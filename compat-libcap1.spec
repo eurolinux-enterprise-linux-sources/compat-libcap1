@@ -1,6 +1,6 @@
 Name: compat-libcap1
 Version: 1.10
-Release: 3%{?dist}
+Release: 7%{?dist}
 Summary: Library for getting and setting POSIX.1e capabilities
 Source: ftp://ftp.kernel.org/pub/linux/libs/security/linux-privs/kernel-2.2/libcap-1.10.tar.gz
 Source1: http://ftp.kernel.org/pub/linux/libs/security/linux-privs/kernel-2.2/capfaq-0.2.txt
@@ -32,12 +32,12 @@ draft 15 capabilities.
 %patch5 -p1
 
 %build
-make PREFIX=%{_prefix} LIBDIR=%{_libdir} 
+make PREFIX=%{_prefix} LIBDIR=%{_libdir} CFLAGS="%{optflags} -I$PWD/libcap/include/"
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 make install FAKEROOT=${RPM_BUILD_ROOT} \
-             LIBDIR=${RPM_BUILD_ROOT}/%{_lib} \
+             LIBDIR=${RPM_BUILD_ROOT}/%{_libdir} \
              SBINDIR=${RPM_BUILD_ROOT}/%{_sbindir} \
              INCDIR=${RPM_BUILD_ROOT}/%{_includedir} \
              MANDIR=${RPM_BUILD_ROOT}/%{_mandir}/ \
@@ -48,10 +48,10 @@ rm -f doc/cap_set_fd* doc/cap_set_file*
 #mv -f doc/*.3 ${RPM_BUILD_ROOT}/%{_mandir}/man3/
 cp %{SOURCE1} doc/
 
-chmod +x ${RPM_BUILD_ROOT}/%{_lib}/*.so.*
+chmod +x ${RPM_BUILD_ROOT}/%{_libdir}/*.so.*
 rm -rf ${RPM_BUILD_ROOT}/%{_sbindir}/
 rm -rf ${RPM_BUILD_ROOT}/%{_includedir}/
-rm -rf ${RPM_BUILD_ROOT}/%{_lib}/*.so
+rm -rf ${RPM_BUILD_ROOT}/%{_libdir}/*.so
 rm -rf ${RPM_BUILD_ROOT}/%{_mandir}/man2/*
 rm -rf ${RPM_BUILD_ROOT}/%{_mandir}/man3/*
 
@@ -60,13 +60,26 @@ rm -rf ${RPM_BUILD_ROOT}/%{_mandir}/man3/*
 
 %files
 %defattr(-,root,root)
-/%{_lib}/*.so.*
+/%{_libdir}/*.so.*
 %doc doc/capability.notes  doc/capfaq-0.2.txt
 
 %clean
 rm -rf ${RPM_BUILD_ROOT}
 
 %changelog
+* Fri Mar 07 2014 Karsten Hopp <karsten@redhat.com> 1.10-7
+- move libraries to /usr/lib*
+
+* Fri Mar 07 2014 Karsten Hopp <karsten@redhat.com> 1.10-6
+- use optflags, ensures that -fstack-protector-strong flag is used
+- Resolves: rhbz 1070799
+
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1.10-5
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.10-4
+- Mass rebuild 2013-12-27
+
 * Wed Nov 21 2012 Karsten Hopp <karsten@redhat.com> 1.10-3
 - fix source URLs
 
